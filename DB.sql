@@ -38,6 +38,9 @@ o	Descripción: Cada vez que se registre una venta en la tabla ventas, el stock 
 o	Tipo de Trigger: AFTER INSERT
 
 */
+
+--actualiza stock tras  venta disminuye stock segun cantidad vendida
+
 DELIMITER $$
 
 CREATE Trigger trg_ventas_insert_AFTER_stock
@@ -65,6 +68,9 @@ o	Descripción: Si alguien intenta vender más unidades de un producto de las qu
 o	Tipo de Trigger: BEFORE INSERT
 
 */
+
+--Evita venta si no hay stock suficiente  lanza error
+
 DELIMITER $$
 CREATE Trigger trg_ventas_insert_BEFORE
 BEFORE INSERT ON ventas
@@ -94,6 +100,8 @@ INSERT INTO ventas (id_producto, cantidad) VALUES (1, 200);
 o	Descripción: Cada vez que se registre una venta, si el precio del producto es superior a $40, su precio debe aumentar un 5%.
 o	Tipo de Trigger: AFTER INSERT
 */
+
+-- aumenta en un precio 5% si precio del prodcuto actual es mayor a 40$  debe registrar una venta 
 DELIMITER $$ 
 CREATE TRIGGER trg_ventas_insert_AFTER
 AFTER INSERT ON ventas
@@ -116,6 +124,8 @@ SELECT * FROM productos WHERE id_producto = 3;
 o	Descripción: Si el precio de un producto cambia, debe guardarse un registro de ese cambio en una tabla de logs llamada log_precios con la fecha del cambio y el nuevo precio.
 o	Tipo de Trigger: AFTER UPDATE
 */
+
+-- registrar en una  tabla de log cada vez que cambie el precio de un producto 
 CREATE TABLE log_precios (
     id_log INT AUTO_INCREMENT PRIMARY KEY,
     id_producto INT,
@@ -148,6 +158,8 @@ o	Descripción: Si una venta es eliminada de la tabla ventas, el stock del produ
 o	Tipo de Trigger: AFTER DELETE
 */
 
+--aumenta el stock del producto cuando se elimina una venta 
+
 DELIMITER $$
 
 CREATE TRIGGER trg_ventas_delete_AFTER
@@ -175,6 +187,7 @@ SELECT * FROM productos WHERE id_producto = 1;
 o	Descripción: Si el stock de un producto es mayor que cero, no se debe permitir eliminar ese producto de la tabla productos.
 o	Tipo de Trigger: BEFORE DELETE
 */
+-- evita eliminar un producto  si su stack  es mayor  a cero 
 
 DELIMITER $$
 CREATE TRIGGER trg_productos_delete_BEFORE
@@ -201,7 +214,7 @@ o	Descripción: Si un producto no tiene stock y se intenta registrar una venta, 
 o	Tipo de Trigger: BEFORE INSERT
 
 */
-
+-- impide  registrar ventas de productos  que no tiene stock disponible 
 DELIMITER $$
 CREATE TRIGGER trg_ventas_sin_stock_BEFORE
 BEFORE INSERT ON ventas
@@ -230,6 +243,10 @@ INSERT INTO ventas (id_producto, cantidad) VALUES (4,20);
 o	Descripción: Si el stock de un producto llega a cero después de una venta, se debe imprimir un mensaje indicando que el producto está agotado.
 o	Tipo de Trigger: AFTER INSERT
 */
+
+
+-- muestra un mensaje si tras una venta el producto queda sin stock 
+
 USE tienda;
 DELIMITER $$
 CREATE TRIGGER rg_ventas_insert_AFTER_agotado
@@ -257,6 +274,7 @@ o	Descripción: Si el precio de un producto se reduce por debajo de $5, debe añ
 o	Tipo de Trigger: AFTER UPDATE
 */
 
+-- marca un producto como promocion  si su precio baja por debajo de $5
 ALTER TABLE productos
 ADD COLUMN en_promocion BOOLEAN DEFAULT FALSE;
 DROP TRIGGER trg_productos_update_AFTER_promocion
@@ -279,12 +297,16 @@ SELECT * FROM productos WHERE id_producto = 2;
 
 
 
+
+
 /*
 10.	 Crear un trigger que, después de insertar una venta, calcule el total de la venta y lo registre en una tabla total_ventas.
 o	Descripción: Después de insertar una venta, se debe calcular el total de la venta (cantidad * precio) y registrar esa información en una nueva tabla llamada total_ventas con la fecha de la venta.
 o	Tipo de Trigger: AFTER INSERT
 */
-USE tienda;
+
+
+-- calcula el total de una venta despues de insertarla y lo guarda en la tabla total_ventas  
 CREATE TABLE total_ventas (
     id_total_venta INT AUTO_INCREMENT PRIMARY KEY,
     id_venta INT,
@@ -304,11 +326,13 @@ BEGIN
     FROM productos
     WHERE id_producto = NEW.id_producto;
     SET total_venta = NEW.cantidad * precio_producto;
-    INSERT INTO total_venta (id_venta, total, fecha_venta)
+    INSERT INTO total_ventas (id_venta, total, fecha_venta)
     VALUES (NEW.id_venta, total_venta, NEW.fecha_venta);
 END$$
 DELIMITER;
 
+--Inserta venta que activa  el trigger 
 INSERT INTO ventas (id_producto, cantidad) VALUES (1, 2);
 
+-- muestra  los totales  calculados de ventas 
 SELECT * FROM total_ventas;
