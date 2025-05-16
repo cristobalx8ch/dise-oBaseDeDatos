@@ -60,7 +60,14 @@ VALUES
 (2, 5),
 (3, 2);
 
+-- ver stock antes de la venta 
+SELECT cantidad_stock FROM productos WHERE id_producto = 1;
 
+-- insetar venta para que reduca el stock
+INSERT INTO ventas (id_producto, cantidad) VALUES (1, 1);
+
+-- ver stock despues de la venta
+SELECT cantidad_stock FROM productos WHERE id_producto = 1;
 
 /*
 2.	Crear un trigger que no permita realizar una venta si no hay suficiente stock.
@@ -208,6 +215,7 @@ SELECT * FROM productos WHERE id_producto = 2;
 --intentar eliminarlo
 DELETE FROM productos WHERE id_producto = 2;
 
+
 /*
 7.	Crear un trigger que registre un mensaje en la consola cuando se intente realizar una venta de un producto que no está en stock.
 o	Descripción: Si un producto no tiene stock y se intenta registrar una venta, se debe imprimir un mensaje de advertencia.
@@ -237,7 +245,9 @@ SELECT * FROM productos WHERE id_producto = 4;
 --registrar una venta  con este producto 
 INSERT INTO ventas (id_producto, cantidad) VALUES (4,20);
 
+UPDATE productos SET cantidad_stock = 0 WHERE id_producto = 2;
 
+INSERT INTO ventas (id_producto, cantidad) VALUES (2, 1);
 /*
 8.	Crear un trigger que registre un mensaje cuando el stock de un producto alcance cero.
 o	Descripción: Si el stock de un producto llega a cero después de una venta, se debe imprimir un mensaje indicando que el producto está agotado.
